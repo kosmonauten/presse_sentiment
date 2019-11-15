@@ -65,7 +65,28 @@ def load_text_from_url(url):
         return load_text_from_20min(url)
     elif server_loc == "blick.ch":
         return load_text_from_blick(url)
+    elif server_loc == 'bscyb.ch':
+        return load_text_from_yb(url)
 
+
+def load_text_from_yb(url):
+    yb = requests.get(url)
+    soup = BeautifulSoup(yb.content, 'html.parser')
+
+    title = soup.select('h2')[0].text
+    text = soup.select('div.block-1-texts-np')
+
+    text_spider = []
+
+    for t in text:
+        text_spider.append(t.text)
+
+    scraped_text = "".join(text_spider)
+    return {
+        'text': scraped_text,
+        'title': title,
+        'teaser': '',
+    }
 
 def load_text_from_srf(url):
     page = requests.get(url)
@@ -98,6 +119,7 @@ def load_text_from_srf(url):
         'title': title,
         'teaser': '',
     }
+
 
 def load_text_from_blick(url):
     blick = requests.get(url)
