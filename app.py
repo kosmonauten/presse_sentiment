@@ -7,6 +7,8 @@ import psycopg2
 from bs4 import BeautifulSoup
 import requests
 import spacy
+from urllib.parse import urlparse
+
 from spacy import displacy
 from collections import Counter
 
@@ -55,6 +57,15 @@ def average_sentiment(text):
 
 
 def load_text_from_url(url):
+    data = urlparse(url)
+    server_loc = ".".join(data.netloc.split(".")[-2:])
+    if server_loc == "srf.ch":
+        return load_text_from_srf(url)
+    elif server_loc == "20min.ch":
+        return load_text_from_20min(url)
+
+
+def load_text_from_srf(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
 
@@ -83,7 +94,31 @@ def load_text_from_url(url):
     return {
         'text': scraped_text,
         'title': title,
-        'teaser': teaser,
+        'teaser': '',
+    }
+
+
+def load_text_from_20min(url):
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+
+    title = soup.select('h1 span')
+    text = soup.select('div.story_text p')
+
+    text_spider = []
+
+    if len(title) > 0:
+        title = title[0].text
+
+    for t in text:
+        text_spider.append(t.text)
+
+    scraped_text = "".join(text_spider)
+
+    return {
+        'text': scraped_text,
+        'title': title,
+        'teaser': '',
     }
 
 
@@ -110,10 +145,8 @@ def add_report():
     id_article = cur.fetchone()[0]
 
     for index, entry in df_sent_list.iterrows():
-        print(entry)
         cur.execute(SQL_INSERT_SENT_LIST, (entry['words'], entry['value'], id_article))
     for index, entry in df_per_and_loc.iterrows():
-        print(entry)
         cur.execute(SQL_INSERT_PANDL_LIST, (entry['entity'], entry['type'], id_article))
         ent = entry['entity']
         typ = entry['type']
