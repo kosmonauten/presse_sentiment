@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="postgres-ybhackathon.postgres.database.azure.com" uuid="210f6abf-54ad-4df2-adc4-077ece630e1a">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <remarks>YBHackathon-Database</remarks>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://postgres-ybhackathon.postgres.database.azure.com:5432/postgres</jdbc-url>
+    </data-source>
+  </component>
+</project>
