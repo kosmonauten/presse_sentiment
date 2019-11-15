@@ -63,6 +63,8 @@ def load_text_from_url(url):
         return load_text_from_srf(url)
     elif server_loc == "20min.ch":
         return load_text_from_20min(url)
+    elif server_loc == "blick.ch":
+        return load_text_from_blick(url)
 
 
 def load_text_from_srf(url):
@@ -97,6 +99,29 @@ def load_text_from_srf(url):
         'teaser': '',
     }
 
+def load_text_from_blick(url):
+    blick = requests.get(url)
+    soup = BeautifulSoup(blick.content, 'html.parser')
+
+    title = soup.select('span.title')
+    text = soup.select('div.article-body p')
+
+    text_spider = []
+
+    if len(title) > 0:
+        title = title[0].text
+    else:
+        title = ""
+
+    for t in text:
+        text_spider.append(t.text)
+
+    scraped_text = "".join(text_spider)
+    return {
+        'text': scraped_text,
+        'title': title,
+        'teaser': '',
+    }
 
 def load_text_from_20min(url):
     page = requests.get(url)
