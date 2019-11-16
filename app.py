@@ -35,7 +35,7 @@ SQL_SELECT_LASTNAME_OF_PLAYER = 'SELECT id FROM player WHERE lastname LIKE %s'
 try:
     conn = psycopg2.connect(CONN_STRING)
 except:
-    print
+    print("Could not find database")
 
 
 def persons_and_locations_in_text(text):
@@ -122,7 +122,9 @@ def load_text_from_srf(url):
 
 
 def load_text_from_blick(url):
-    blick = requests.get(url)
+    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+    headers = {'User-Agent': user_agent}
+    blick = requests.get(url, headers=headers)
     soup = BeautifulSoup(blick.content, 'html.parser')
 
     title = soup.select('span.title')
@@ -135,10 +137,13 @@ def load_text_from_blick(url):
     else:
         title = ""
 
+    print(title)
     for t in text:
         text_spider.append(t.text)
 
     scraped_text = "".join(text_spider)
+    if scraped_text == "":
+        print(blick)
     return {
         'text': scraped_text,
         'title': title,
@@ -201,7 +206,7 @@ def add_report():
         # Im Moment sind nur Personen relevant
         if typ == 'PER':
             for possible_name in ent.split(" "):
-                cur.execute(SQL_SELECT_LASTNAME_OF_PLAYER, (possible_name,))
+                cur.execute(SQL_SELECT_LASTNAME_OF_PLAYER, ('%' + possible_name,))
                 possible_player = cur.fetchone()
                 if possible_player is not None:
                     player_id = possible_player[0]
@@ -209,6 +214,7 @@ def add_report():
                     cur.execute(SQL_INSERT_PLAYER_ARTICLE, (id_article, player_id))
     conn.commit()
     cur.close()
+    print(url)
     print(id_article)
     return jsonify(webcontent)
 
